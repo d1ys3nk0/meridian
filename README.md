@@ -61,6 +61,8 @@ Use the recommendations below when introducing or explicitly migrating an identi
 
 Use the same lowercase slug for the same meaning across projects. Uppercase display abbreviations such as EDG and HST and the full names below explain the slugs. Extend the registry locally for product identities, tenants, sites, and exceptions. Projects define which values their parsers accept.
 
+When choosing a World slug, prefer a short, distinctive abbreviation of the product name, such as `uncrn` for Unicorn. Document the full name alongside the slug and reuse the slug consistently so identifiers stay short and easy to search for.
+
 ### Realm and Space slugs
 
 | Realm (`OPS_REALM`) | Full name | Intended meaning | Recommended Spaces (`OPS_SPACE`) |
@@ -79,7 +81,7 @@ The input names below show how existing `OPS_*` contracts can map to Meridian’
 | `OPS_UNIT` | `core` | Core | Main application backend component. |
 | `OPS_UNIT` | `web` | Web | Web frontend component. |
 | `OPS_UNIT` | `ops` | Operations | Operational tooling component, where independently identified. |
-| `OPS_WORLD` | `<product>` | Registered product or system name | Stable project-owned product slug, such as `atlas` for Atlas. |
+| `OPS_WORLD` | `<product>` | Registered product or system name | Stable project-owned product slug, such as `uncrn` for Unicorn. |
 | `OPS_AREA` | `edg` | Edge | User-operated laptops, desktops, and workstations. |
 | `OPS_AREA` | `cld` | Cloud | Cloud infrastructure area, with provider or regional scope defined by the project. |
 | `OPS_AREA` | `dc` | Datacenter | Managed datacenter infrastructure area, with sites defined by the project. |
@@ -112,7 +114,7 @@ Choose the Realm by operational purpose, independently of the hosting technology
 
 Resolve the actual topology from configuration. The recommended Cell slugs give readers a naming mnemonic. Choose `hst` for a native application installation, including when supporting dependencies run in Compose. Choose `cmp` for a Compose-based application installation. VM nodes, container replicas, and Kubernetes nodes can all be members of one Cell.
 
-A bare `hst`, `cmp` or `vgt` is appropriate when unique within World + Realm + Area. Two independently identified workstations in the same `(atlas, lab, edg)` scope need distinct stable Cell slugs, such as `hst-ws01` and `hst-ws02`. Repeating a suggested slug in another World, Realm or Area remains valid. A Cell can retain its identity as its implementation changes.
+A bare `hst`, `cmp` or `vgt` is appropriate when unique within World + Realm + Area. Two independently identified workstations in the same `(uncrn, lab, edg)` scope need distinct stable Cell slugs, such as `hst-ws01` and `hst-ws02`. Repeating a suggested slug in another World, Realm or Area remains valid. A Cell can retain its identity as its implementation changes.
 
 ## State, placement and metadata
 
@@ -140,7 +142,7 @@ When a dependency cannot safely serve several Spaces, decide whether its lifecyc
 
 Runtime role determines ownership. A Temporal server can be Realm-owned infrastructure while a Temporal worker container belongs to the Core service deployment for its Space. An infrastructure component may own reusable tooling for deployment-bound processes while the consuming deployment coordinates their lifecycle.
 
-Use the World–Realm scope in shared infrastructure names such as `atlas-lab-postgres`. Use the Space scope for resources whose lifecycle follows that Space. Include Space and the consuming Service in deployment-local process names such as `atlas-lab-sbx-core-worker`, qualifying placement wherever names from multiple Cells share a namespace. Logical databases can remain `atlas_lab_sbx` and `atlas_lab_tst` regardless of Area or Cell. Verify isolation independently of resource names. Shared cluster-level roles or administrative credentials remain dependency/Realm-owned where applicable. Application data, authentication state, signing material and files remain Space-owned under their actual contracts. Do not reset shared roles or rotate shared credentials as a side effect of provisioning a Space.
+Use the World–Realm scope in shared infrastructure names such as `uncrn-lab-postgres`. Use the Space scope for resources whose lifecycle follows that Space. Include Space and the consuming Service in deployment-local process names such as `uncrn-lab-sbx-core-worker`, qualifying placement wherever names from multiple Cells share a namespace. Logical databases can remain `uncrn_lab_sbx` and `uncrn_lab_tst` regardless of Area or Cell. Verify isolation independently of resource names. Shared cluster-level roles or administrative credentials remain dependency/Realm-owned where applicable. Application data, authentication state, signing material and files remain Space-owned under their actual contracts. Do not reset shared roles or rotate shared credentials as a side effect of provisioning a Space.
 
 Logical separation must enforce application and API isolation. Sharing a process accepts a common failure and maintenance boundary. Validate that each consumer selects its own database/tenant, endpoint and credentials, and that unauthorized cross-Space requests or tokens cannot access another Space's state. Enforce authorization on each boundary independently of namespaces and ports. Shared mail or object fixtures must be selected and removed by exact ownership rather than clearing a service globally.
 
@@ -156,9 +158,9 @@ The examples use fictional World and site names. They describe identities and re
 
 ### Local development and Dokploy
 
-World `atlas` configures Spaces `sbx` and `tst` in Realm `lab` on the host installation `(atlas, lab, edg, host)`. Both deployments run their own application processes and use a Realm-owned Compose project for shared dependencies. PostgreSQL provides separate application databases and owners. The shared Temporal server serves separate namespaces, and each Space runs its own worker. A test reset operates on `tst` resources and preserves `sbx` and shared dependencies.
+World `uncrn` configures Spaces `sbx` and `tst` in Realm `lab` on the host installation `(uncrn, lab, edg, hst)`. Both deployments run their own application processes and use a Realm-owned Compose project for shared dependencies. PostgreSQL provides separate application databases and owners. The shared Temporal server serves separate namespaces, and each Space runs its own worker. A test reset operates on `tst` resources and preserves `sbx` and shared dependencies.
 
-The production configuration uses environment `(atlas, prd, hq)` and the Dokploy target `(atlas, prd, dc, dkp)`. Application resource names use the production Space. Each project owns the topology and dependency configuration behind its target.
+The production configuration uses environment `(uncrn, prd, hq)` and the Dokploy target `(uncrn, prd, dc, dkp)`. Application resource names use the production Space. Each project owns the topology and dependency configuration behind its target.
 
 ### Shared QA, production Cells, and a Vagrant lab
 
@@ -172,9 +174,9 @@ In Realm `lab`, the Vagrant inventory defines Cells `v1a` and `v1b` in Area `edg
 
 ### Native, Compose, and VM placements
 
-For a personal laboratory, `(atlas, lab, edg, hst)` can identify a native host installation even when its dependencies run in Compose. Choose `cmp` when the application services themselves run through Compose. A target `(atlas, lab, edg, vgt)` can represent a Vagrant installation with several VM nodes.
+For a personal laboratory, `(uncrn, lab, edg, hst)` can identify a native host installation even when its dependencies run in Compose. Choose `cmp` when the application services themselves run through Compose. A target `(uncrn, lab, edg, vgt)` can represent a Vagrant installation with several VM nodes.
 
-Space `sbx` can deploy to both `hst` and `vgt` while retaining environment identity `(atlas, lab, sbx)`. Decide explicitly whether these deployments share or replicate state. Use distinct Spaces when the placements represent distinct application environments.
+Space `sbx` can deploy to both `hst` and `vgt` while retaining environment identity `(uncrn, lab, sbx)`. Decide explicitly whether these deployments share or replicate state. Use distinct Spaces when the placements represent distinct application environments.
 
 ### Availability zones and quorum
 
