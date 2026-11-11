@@ -51,6 +51,8 @@ flowchart LR
 
 ## Adopting Meridian
 
+See [Kerbmark’s adoption path](https://github.com/d1ys3nk0/kerbmark#use-the-frameworks-together) when combining Meridian with the workspace, engineering, and Ansible frameworks.
+
 For offline use, copy the marked quick-reference block verbatim into one Markdown file in the consumer repository. Record the full Meridian commit and link back to this README. Route basic questions to the local copy and use this README for detailed guidance. When refreshing a copy, extract the block from the chosen commit and compare the copied text with that revision. Document project-specific slugs, inputs, identifier syntax, topology, and exceptions with their owners. The identity tuples describe scope. Each project defines its own configuration contract and each target system defines its separators, escaping, and length limits.
 
 Use the recommendations below when introducing or explicitly migrating an identity. Before renaming an existing slug, account for consumers, named resources, and recovery procedures.
@@ -124,13 +126,21 @@ Release versions, build identifiers, image references, deployment execution tags
 
 ### Shared dependencies and Space isolation
 
-Use one logical instance per World and Realm for each dependency that supports suitable Space isolation. Evaluate supported databases, schemas, tenants, namespaces, buckets, accounts and other native boundaries before declaring a dependency unshareable. Separate application data using a boundary the dependency enforces, such as a database, schema, tenant, key prefix, namespace, queue, or file volume. Shared infrastructure belongs to the Realm. For multi-Cell placements, document physical members, replication, endpoints, and reachability.
+Choose the ownership scope by who controls the dependency’s lifecycle and state, including configuration, startup, shutdown, reset, and recovery.
 
-A dependency that cannot safely serve multiple Spaces normally belongs to the consuming service’s application deployment, with configuration, startup, shutdown, reset and recovery coordinated by that deployment. Before choosing a deployment-bound instance, an isolation exception, a replacement or removal, explain the unsupported sharing or isolation requirement and get explicit approval from the responsible project decision-maker. Evaluate the dependency’s native boundaries when Spaces need different configuration.
+| Scope | Lifecycle and state ownership |
+| --- | --- |
+| Realm-shared | The World and Realm own the logical dependency. Each Space owns the application state inside its enforced boundary, such as a database or tenant. |
+| Space-owned | One application environment owns the dependency and its lifecycle. It can serve the same Space across several Cells. Document how placements reach it and how its state is shared, replicated, and recovered. |
+| Deployment-local | One logical deployment owns the dependency and coordinates its lifecycle. Include the qualified deployment in the resource identity where needed to distinguish installations. |
+
+Use one logical instance per World and Realm for each dependency that supports suitable Space isolation. Evaluate the dependency’s native boundaries, such as databases, schemas, tenants, namespaces, buckets, accounts, queues, or volumes, including when Spaces need different configuration. Document physical members, replication, endpoints, and reachability for multi-Cell placements.
+
+When a dependency cannot safely serve several Spaces, decide whether its lifecycle follows one Space across placements or one deployment. Before choosing a dedicated instance, an isolation exception, a replacement, or removal, explain the unsupported sharing or isolation requirement and get explicit approval from the responsible project decision-maker.
 
 Runtime role determines ownership. A Temporal server can be Realm-owned infrastructure while a Temporal worker container belongs to the Core service deployment for its Space. An infrastructure component may own reusable tooling for deployment-bound processes while the consuming deployment coordinates their lifecycle.
 
-Use the World–Realm scope in shared infrastructure names such as `atlas-lab-postgres`. Include Space and the consuming Service in deployment-bound process names such as `atlas-lab-sbx-core-worker`, following the project’s naming contract. Logical databases can remain `atlas_lab_sbx` and `atlas_lab_tst` regardless of Area or Cell. Verify isolation independently of resource names. Shared cluster-level roles or administrative credentials remain dependency/Realm-owned where applicable. Application data, authentication state, signing material and files remain Space-owned under their actual contracts. Do not reset shared roles or rotate shared credentials as a side effect of provisioning a Space.
+Use the World–Realm scope in shared infrastructure names such as `atlas-lab-postgres`. Use the Space scope for resources whose lifecycle follows that Space. Include Space and the consuming Service in deployment-local process names such as `atlas-lab-sbx-core-worker`, qualifying placement wherever names from multiple Cells share a namespace. Logical databases can remain `atlas_lab_sbx` and `atlas_lab_tst` regardless of Area or Cell. Verify isolation independently of resource names. Shared cluster-level roles or administrative credentials remain dependency/Realm-owned where applicable. Application data, authentication state, signing material and files remain Space-owned under their actual contracts. Do not reset shared roles or rotate shared credentials as a side effect of provisioning a Space.
 
 Logical separation must enforce application and API isolation. Sharing a process accepts a common failure and maintenance boundary. Validate that each consumer selects its own database/tenant, endpoint and credentials, and that unauthorized cross-Space requests or tokens cannot access another Space's state. Enforce authorization on each boundary independently of namespaces and ports. Shared mail or object fixtures must be selected and removed by exact ownership rather than clearing a service globally.
 
