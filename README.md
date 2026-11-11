@@ -6,46 +6,48 @@ Meridian is a framework for infrastructure identity and deployment topology. It 
 
 ## Identity dimensions
 
-Use the relative order **Unit, World, Realm, Space, Area, Cell** when presenting these dimensions. An operation needs only the dimensions it consumes. Document the fixed enclosing scope whenever an identifier omits a dimension.
+Use the relative order **Service, Unit, World, Realm, Space, Area, Cell** when presenting these dimensions. An operation needs only the dimensions it consumes. Document the fixed enclosing scope whenever an identifier omits a dimension.
 
 | Dimension | Meaning |
 | --- | --- |
+| **Service** | A runtime service of a Unit, such as an API server or worker. One Unit can run several Services, and each Service can run several processes or replicas. |
 | **Unit** | A component such as an application backend, frontend, or infrastructure unit. |
 | **World** | The product or system. |
 | **Realm** | An operational purpose within a World, such as production or collaborative development. |
 | **Space** | A logical application and state namespace within a World and Realm. |
-| **Area** | An infrastructure area within a World and Realm that contains one or more Cells. |
-| **Cell** | An installation or logical deployment target within an Area. Its final slug is opaque. |
-
-A **Service** is a runtime service of a Unit, such as an API server or worker. One Unit can run several Services, and each Service can run several processes or replicas.
+| **Area** | An infrastructure placement scope within a World and Realm. |
+| **Cell** | An installation or logical deployment target that can occupy one or more Areas. Its slug is opaque. |
 
 An **availability zone (AZ)** is a physical failure domain. A Cell may occupy one AZ or span several AZs or datacenters. Record provider zone names and shared physical risks separately from logical placement.
 
 ## Qualified identities
 
-| Identity | Qualified tuple |
-| --- | --- |
-| Application environment | World + Realm + Space |
-| Deployment target | World + Realm + Area + Cell |
-| Logical deployment | World + Realm + Space + Area + Cell |
+| Identity | Qualified tuple | URI pattern |
+| --- | --- | --- |
+| Logical application environment | World + Realm + Space | `{world}-{realm}-{space}` |
+| Server | World + Realm + Area + Node ID | `{realm}-{area}-{nodeId}.{world}` |
+| Deployment Cell | World + Realm + Cell | `{world}-{realm}-{cell}` |
 
-A deployment associates one environment with one target in the same World and Realm. A Space may deploy to several Cells, and a Cell may host several Spaces. Each environment has at most one logical deployment per Cell. Its Units, Services, nodes, replicas, and successive releases belong to that deployment.
+Record each Cell's Areas in placement configuration. The same Cell URI identifies the target across all its Areas. In the server URI, `nodeId` identifies the node within its World, Realm, and Area.
+
+A logical deployment associates one Space with one Cell in the same World and Realm. Its qualified tuple is World + Realm + Space + Cell. A Space may deploy to several Cells, and a Cell may host several Spaces. Each environment has at most one logical deployment per Cell. Its Units, Services, nodes, replicas, and successive releases belong to that deployment.
 
 ### State ownership and Cell roles
 
 Application state belongs to its World, Realm, and Space. Scope placement resources to their qualified target. A dependency that can safely isolate Spaces can serve the whole World and Realm as one logical instance.
 
-The Cell slug is unique within its World, Realm, and Area and may repeat in another scope. Cell slugs can resemble provider or zone names. Resolve roles and physical placement from the target configuration. Master and replica responsibility, membership, and the descriptive role `cluster` are installation properties. Changing these properties preserves Cell identity. Each controller defines its supported roles and operations.
+The Cell slug is unique within its World and Realm and may repeat in another World or Realm. Cell slugs can resemble provider or zone names. Resolve roles and physical placement from the target configuration. Master and replica responsibility, membership, and the descriptive role `cluster` are installation properties. Changing these properties preserves Cell identity. Each controller defines its supported roles and operations.
 
 <!-- meridian-quick-reference:end -->
 
 ```mermaid
 flowchart LR
     WR["World + Realm"] --> E["Application environment<br/>World + Realm + Space"]
-    WR --> C["Deployment target<br/>World + Realm + Area + Cell"]
-    E -->|zero or more| D["Logical deployment<br/>World + Realm + Space + Area + Cell"]
+    WR --> C["Deployment Cell<br/>World + Realm + Cell"]
+    E -->|zero or more| D["Logical deployment<br/>World + Realm + Space + Cell"]
     C -->|zero or more| D
     D --> U["Units and Services"]
+    C -. logical placement .-> A["One or more Areas"]
     C -. physical placement .-> Z["Availability zones"]
 ```
 
@@ -114,13 +116,13 @@ Choose the Realm by operational purpose, independently of the hosting technology
 
 Resolve the actual topology from configuration. The recommended Cell slugs give readers a naming mnemonic. Choose `hst` for a native application installation, including when supporting dependencies run in Compose. Choose `cmp` for a Compose-based application installation. VM nodes, container replicas, and Kubernetes nodes can all be members of one Cell.
 
-A bare `hst`, `cmp` or `vgt` is appropriate when unique within World + Realm + Area. Two independently identified workstations in the same `(uncrn, lab, edg)` scope need distinct stable Cell slugs, such as `hst-ws01` and `hst-ws02`. Repeating a suggested slug in another World, Realm or Area remains valid. A Cell can retain its identity as its implementation changes.
+A bare `hst`, `cmp` or `vgt` is appropriate when unique within World + Realm. Two independently identified workstations in `(uncrn, lab)` need distinct stable Cell slugs, such as `hst-ws01` and `hst-ws02`, even if they occupy different Areas. A Cell can retain its identity as its implementation changes.
 
 ## State, placement and metadata
 
 Scope application-owned databases, buckets, queues, and other application namespaces by World + Realm + Space, adding Unit or module distinctions where needed. The state identity persists across deployments of the same Space. Replication, independent physical copies and shared access require explicit data ownership and routing contracts.
 
-Placement-owned resources use the qualified deployment target where needed, for example host management or infrastructure endpoints. Resources owned by a particular application deployment may need both Space and the qualified Cell target. Project-specific shortened context, lock or history keys must document their fixed scope and collision limits.
+Scope placement-owned resources to their owner. Use the server identity for host management and the qualified Cell identity for resources shared by the installation. Resources owned by a particular application deployment may need both Space and the qualified Cell target. Project-specific shortened context, lock or history keys must document their fixed scope and collision limits.
 
 Moving data, switching endpoints, promoting a database, and changing public ingress each require an explicit operation and verification.
 
@@ -158,15 +160,15 @@ The examples use fictional World and site names. They describe identities and re
 
 ### Local development and Dokploy
 
-World `uncrn` configures Spaces `sbx` and `tst` in Realm `lab` on the host installation `(uncrn, lab, edg, hst)`. Both deployments run their own application processes and use a Realm-owned Compose project for shared dependencies. PostgreSQL provides separate application databases and owners. The shared Temporal server serves separate namespaces, and each Space runs its own worker. A test reset operates on `tst` resources and preserves `sbx` and shared dependencies.
+World `uncrn` configures Spaces `sbx` and `tst` in Realm `lab` on the host installation `(uncrn, lab, hst)` in Area `edg`. Both deployments run their own application processes and use a Realm-owned Compose project for shared dependencies. PostgreSQL provides separate application databases and owners. The shared Temporal server serves separate namespaces, and each Space runs its own worker. A test reset operates on `tst` resources and preserves `sbx` and shared dependencies.
 
-The production configuration uses environment `(uncrn, prd, hq)` and the Dokploy target `(uncrn, prd, dc, dkp)`. Application resource names use the production Space. Each project owns the topology and dependency configuration behind its target.
+The production configuration uses environment `(uncrn, prd, hq)` and the Dokploy target `(uncrn, prd, dkp)` in Area `dc`. Application resource names use the production Space. Each project owns the topology and dependency configuration behind its target.
 
 ### Shared QA, production Cells, and a Vagrant lab
 
-World `orion` configures QA Spaces `qa01`, `qa02`, and `qa03` in Realm `dev` for one target, `(orion, dev, dc, r1a)`. Each Space has its own deployment identity.
+World `orion` configures QA Spaces `qa01`, `qa02`, and `qa03` in Realm `dev` for one target, `(orion, dev, r1a)`, in Area `dc`. Each Space has its own deployment identity.
 
-In Realm `prd`, Space `hq` has targets `(orion, prd, dc, r1a)` and `(orion, prd, dc, r1b)`. Each installation contains application and database hosts. Inventory declares master and replica responsibilities, while the two Cell slugs stay stable through a role transition. Dependency recovery, writer fencing, and public ingress cutover require their own controls.
+In Realm `prd`, Space `hq` has targets `(orion, prd, r1a)` and `(orion, prd, r1b)`, both in Area `dc`. Each installation contains application and database hosts. Inventory declares master and replica responsibilities, while the two Cell slugs stay stable through a role transition. Dependency recovery, writer fencing, and public ingress cutover require their own controls.
 
 In Realm `lab`, the Vagrant inventory defines Cells `v1a` and `v1b` in Area `edg`. Each Cell contains separate application and database VMs. The lab deploy configuration selects Space `dbg`. VM provisioning and application deployment are distinct operations.
 
@@ -174,9 +176,13 @@ In Realm `lab`, the Vagrant inventory defines Cells `v1a` and `v1b` in Area `edg
 
 ### Native, Compose, and VM placements
 
-For a personal laboratory, `(uncrn, lab, edg, hst)` can identify a native host installation even when its dependencies run in Compose. Choose `cmp` when the application services themselves run through Compose. A target `(uncrn, lab, edg, vgt)` can represent a Vagrant installation with several VM nodes.
+For a personal laboratory, `(uncrn, lab, hst)` can identify a native host installation even when its dependencies run in Compose. Choose `cmp` when the application services themselves run through Compose. A target `(uncrn, lab, vgt)` can represent a Vagrant installation with several VM nodes. Both installations can occupy Area `edg`.
 
 Space `sbx` can deploy to both `hst` and `vgt` while retaining environment identity `(uncrn, lab, sbx)`. Decide explicitly whether these deployments share or replicate state. Use distinct Spaces when the placements represent distinct application environments.
+
+### Kubernetes across Areas
+
+World `uncrn` deploys the application environment `uncrn-prd-hq` to a Kubernetes cluster with Cell URI `uncrn-prd-k8s`. Two workers have server URIs `prd-east-worker01.uncrn` and `prd-west-worker01.uncrn`. The placement configuration associates Areas `east` and `west` with the same Cell, so both workers belong to one deployment target.
 
 ### Availability zones and quorum
 
