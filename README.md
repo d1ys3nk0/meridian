@@ -2,6 +2,8 @@
 
 Meridian is a framework for infrastructure identity and deployment topology. It gives application teams and operators a shared vocabulary for naming environments, placing deployments, and assigning state and dependencies to their owners.
 
+<!-- meridian-quick-reference:start -->
+
 ## Identity dimensions
 
 Use the relative order **Unit, World, Realm, Space, Area, Cell** when presenting these dimensions. An operation needs only the dimensions it consumes. Document the fixed enclosing scope whenever an identifier omits a dimension.
@@ -29,6 +31,14 @@ An **availability zone (AZ)** is a physical failure domain. A Cell may occupy on
 
 A deployment associates one environment with one target in the same World and Realm. A Space may deploy to several Cells, and a Cell may host several Spaces. Each environment has at most one logical deployment per Cell. Its Units, Services, nodes, replicas, and successive releases belong to that deployment.
 
+### State ownership and Cell roles
+
+Application state belongs to its World, Realm, and Space. Scope placement resources to their qualified target. A dependency that can safely isolate Spaces can serve the whole World and Realm as one logical instance.
+
+The Cell slug is unique within its World, Realm, and Area and may repeat in another scope. Cell slugs can resemble provider or zone names. Resolve roles and physical placement from the target configuration. Master and replica responsibility, membership, and the descriptive role `cluster` are installation properties. Changing these properties preserves Cell identity. Each controller defines its supported roles and operations.
+
+<!-- meridian-quick-reference:end -->
+
 ```mermaid
 flowchart LR
     WR["World + Realm"] --> E["Application environment<br/>World + Realm + Space"]
@@ -39,11 +49,9 @@ flowchart LR
     C -. physical placement .-> Z["Availability zones"]
 ```
 
-The Cell slug is unique within its World, Realm, and Area and may repeat in another scope. Cell slugs can resemble provider or zone names. Resolve roles and physical placement from the target configuration. Master and replica responsibility, membership, and the descriptive role `cluster` are installation properties. Changing these properties preserves Cell identity. Each controller defines its supported roles and operations.
-
 ## Adopting Meridian
 
-Link to this README from project glossaries, infrastructure guides, and agent instructions. Document project-specific slugs, inputs, identifier syntax, topology, and exceptions with their owners. The identity tuples describe scope. Each project defines its own configuration contract and each target system defines its separators, escaping, and length limits.
+For offline use, copy the marked quick-reference block verbatim into one Markdown file in the consumer repository. Record the full Meridian commit and link back to this README. Route basic questions to the local copy and use this README for detailed guidance. When refreshing a copy, extract the block from the chosen commit and compare the copied text with that revision. Document project-specific slugs, inputs, identifier syntax, topology, and exceptions with their owners. The identity tuples describe scope. Each project defines its own configuration contract and each target system defines its separators, escaping, and length limits.
 
 Use the recommendations below when introducing or explicitly migrating an identity. Before renaming an existing slug, account for consumers, named resources, and recovery procedures.
 
