@@ -85,12 +85,9 @@ The input names below show how existing `OPS_*` contracts can map to Meridian’
 | `OPS_UNIT` | `ops` | Operations | Operational tooling component, where independently identified. |
 | `OPS_WORLD` | `<product>` | Registered product or system name | Stable project-owned product slug, such as `uncrn` for Unicorn. |
 | `OPS_AREA` | `edg` | Edge | User-operated laptops, desktops, and workstations. |
-| `OPS_AREA` | `cld` | Cloud | Cloud infrastructure area, with provider or regional scope defined by the project. |
-| `OPS_AREA` | `dc` | Datacenter | Managed datacenter infrastructure area, with sites defined by the project. |
 | `OPS_CELL` | `hst` | Host | Installation whose application processes execute directly in the host operating system. |
-| `OPS_CELL` | `cmp` | Compose | Installation whose application services execute through a container Compose model. |
-| `OPS_CELL` | `dkp` | Dokploy | Dokploy-managed installation with project-defined orchestration and placement. |
 | `OPS_CELL` | `vgt` | Vagrant | Installation in one or more virtual machines managed through Vagrant. |
+| `OPS_CELL` | `dkp` | Dokploy | Dokploy-managed installation with project-defined orchestration and placement. |
 | `OPS_CELL` | `k8s` | Kubernetes | Kubernetes-based installation, with the actual cluster/namespace boundary explicitly defined by the project. |
 
 Existing `OPS_SERVICE` contracts can use the following Service vocabulary.
