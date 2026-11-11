@@ -59,6 +59,17 @@ Use the recommendations below when introducing or explicitly migrating an identi
 
 Use the same lowercase slug for the same meaning across projects. Uppercase display abbreviations such as EDG and HST and the full names below explain the slugs. Extend the registry locally for product identities, tenants, sites, and exceptions. Projects define which values their parsers accept.
 
+### Realm and Space slugs
+
+| Realm (`OPS_REALM`) | Full name | Intended meaning | Recommended Spaces (`OPS_SPACE`) |
+| --- | --- | --- | --- |
+| `prd` | Production | Production operation. | `hq` (Headquarters) for the main production application environment. |
+| `stg` | Staging | Pre-production acceptance with production-like configuration and, where explicitly permitted, real data. | — |
+| `dev` | Development | Collaborative development and testing, normally delivered to a centrally reachable, shared environment. | `qa01`, `qa02`, … (Quality assurance 01, 02, …) for independently identified collaborative QA environments. |
+| `lab` | Laboratory | Individual experimentation and development, normally local and private to one person. | `sbx` (Sandbox) for interactive development and experimentation. `tst` (Test) for dedicated automated-test state and fixtures. |
+
+### Slugs shared across realms
+
 The input names below show how existing `OPS_*` contracts can map to Meridian’s dimensions.
 
 | Existing identity input | Recommended slug | Full name | Intended meaning |
@@ -67,14 +78,6 @@ The input names below show how existing `OPS_*` contracts can map to Meridian’
 | `OPS_UNIT` | `web` | Web | Web frontend component. |
 | `OPS_UNIT` | `ops` | Operations | Operational tooling component, where independently identified. |
 | `OPS_WORLD` | `<product>` | Registered product or system name | Stable project-owned product slug, such as `atlas` for Atlas. |
-| `OPS_REALM` | `prd` | Production | Production operation. |
-| `OPS_REALM` | `stg` | Staging | Pre-production acceptance with production-like configuration and, where explicitly permitted, real data. |
-| `OPS_REALM` | `dev` | Development | Collaborative development and testing, normally delivered to a centrally reachable, shared environment. |
-| `OPS_REALM` | `lab` | Laboratory | Individual experimentation and development, normally local and private to one person. |
-| `OPS_SPACE` | `hq` | Headquarters | Main production application environment. |
-| `OPS_SPACE` | `sbx` | Sandbox | Interactive development and experimentation state, commonly within `lab`. |
-| `OPS_SPACE` | `tst` | Test | Dedicated automated-test state and fixtures, commonly within `lab`. |
-| `OPS_SPACE` | `qa01`, `qa02`, … | Quality assurance 01, 02, … | Independently identified collaborative QA environments, commonly within `dev`. |
 | `OPS_AREA` | `edg` | Edge | User-operated laptops, desktops, and workstations. |
 | `OPS_AREA` | `cld` | Cloud | Cloud infrastructure area, with provider or regional scope defined by the project. |
 | `OPS_AREA` | `dc` | Datacenter | Managed datacenter infrastructure area, with sites defined by the project. |
