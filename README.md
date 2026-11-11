@@ -59,6 +59,12 @@ For offline use, copy the marked quick-reference block verbatim into one Markdow
 
 Use the recommendations below when introducing or explicitly migrating an identity. Before renaming an existing slug, account for consumers, named resources, and recovery procedures.
 
+### Migrating Area-qualified Cell identities
+
+Earlier Meridian guidance qualified a Cell by World + Realm + Area + Cell. When explicitly adopting the current model, first distinguish one installation spanning several Areas from separate installations. One multi-Area Cell keeps one identity across its placements. Separate Cells in the same World and Realm need distinct stable slugs even when their Areas differ; Area cannot disambiguate their identities. Moving a Cell's placement alone does not change its identity.
+
+Before changing consumers, map old targets to their intended Cells and review selectors, resource names, endpoints, locks, migration completion records, and recovery procedures. Preserve the meaning and affected scope of existing completion history; do not reset records or merge unrelated histories merely by removing Area from a key. Coordinate overlapping old and new operation scopes during the transition, and verify each mapping before enabling mutations. This guidance authorizes no automatic renaming or consumer migration.
+
 ## Recommended slugs and readable names
 
 Use the same lowercase slug for the same meaning across projects. Uppercase display abbreviations such as EDG and HST and the full names below explain the slugs. Extend the registry locally for product identities, tenants, sites, and exceptions. Projects define which values their parsers accept.
