@@ -183,7 +183,3 @@ Space `sbx` can deploy to both `hst` and `vgt` while retaining environment ident
 Two Cells can occupy different physical failure domains. For example, Cell `east` in `room-a` can serve as master while Cell `west` in `room-b` follows as a replica. Both may host Space `hq`. Changing which Cell serves as master preserves both deployment identities.
 
 One distributed Cell can also span several AZs and host one logical deployment of `hq`. With three voters, one per independent AZ, a majority quorum of two can survive one AZ loss. With five voters in five independent failure domains, a majority quorum of three can survive two domain losses. These examples assume a system designed for majority voting. Evaluate latency, correlated failures, fencing, storage durability, replication mode, and each service’s quorum rules independently.
-
-## License
-
-[MIT](LICENSE)
